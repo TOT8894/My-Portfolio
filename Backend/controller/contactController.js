@@ -1,4 +1,4 @@
-import Contact from "../model/userModel.js";
+import Contact from "../model/contactModel.js";
 import { sendContactEmail } from "../emailService/emailService.js";
 export const contactme = async(req,res)=>{
     try{
