@@ -1,48 +1,48 @@
 import './projects.css'
 
 export const Projects = () => {
-  const projects = [
-    {
-      title: "E-Commerce Platform",
-      description: "A full-featured online shopping platform with cart management, user authentication, payment integration, and admin dashboard. Built with React, Node.js, and MongoDB.",
-      technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe"],
-      demoLink: "#",
-      githubLink: "https://github.com/TOT8894?tab=repositories",
-      featured: true
-    },
-    {
-      title: "Employee Task Manager",
-      description: "A collaborative task management application with real-time updates, team workspaces, drag-and-drop kanban boards, and progress tracking.",
-      technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe","Rest APIs"],
-      demoLink: "#",
-      githubLink: "https://github.com/TOT8894?tab=repositories",
-      featured: true
-    },
-    {
-      title: "Portfolio Website",
-      description: "A modern, responsive portfolio website with smooth animations, glassmorphism design, and interactive elements. Features include dark/light theme toggle.",
-      technologies: ["React", "Node.js", "MongoDB", "Express","Rest APIs"],
-      demoLink: "#",
-      githubLink: "https://github.com/TOT8894?tab=repositories",
-      featured: true
-    },
-    {
-      title: "Weather Dashboard",
-      description: "A weather application that provides real-time weather data, forecasts, and interactive maps. Features location-based weather and 7-day forecast.",
-      technologies:["React", "Node.js", "MongoDB", "Express","Rest APIs"],
-      demoLink: "#",
-      githubLink: "https://github.com/TOT8894?tab=repositories",
-      featured: false
-    },
-    {
-      title: "Smart Healthcare System",
-      description: "A real-time chat application with group chats, file sharing, and online status indicators. Built with WebSocket for instant messaging.",
-      technologies: ["Node.js", "Socket.io", "Express", "MongoDB", "React","REst APIs"],
-      demoLink: "#",
-      githubLink: "https://github.com/TOT8894?tab=repositories",
-      featured: false
-    },
-  ]
+const projects = [
+  {
+    title: "E-Commerce Platform",
+    description: "A scalable online shopping platform designed to help businesses manage products, users, and transactions in one system. It enables customers to browse products, securely authenticate, add items to a cart, and complete purchases through integrated payment processing, while administrators control inventory, orders, and overall store operations through a centralized dashboard.",
+    technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe"],
+    demoLink: "#",
+    githubLink: "https://github.com/TOT8894?tab=repositories",
+    featured: true
+  },
+  {
+    title: "Employee Task Manager",
+    description: "A collaborative task management system built to improve team productivity and workflow transparency. It allows teams to organize tasks within shared workspaces, track progress in real time, and manage task lifecycles through an interactive board, ensuring better coordination, accountability, and efficient project execution.",
+    technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe", "Rest APIs"],
+    demoLink: "#",
+    githubLink: "https://github.com/TOT8894?tab=repositories",
+    featured: true
+  },
+  {
+    title: "Portfolio Website",
+    description: "A modern personal portfolio platform created to showcase skills, projects, and professional identity through an interactive and responsive interface. It delivers a smooth user experience with dynamic content rendering, theme customization, and seamless navigation, helping present technical expertise in a visually engaging and accessible way.",
+    technologies: ["React", "Node.js", "MongoDB", "Express", "Rest APIs"],
+    demoLink: "#",
+    githubLink: "https://github.com/TOT8894?tab=repositories",
+    featured: true
+  },
+  {
+    title: "Weather Dashboard",
+    description: "A real-time weather information system designed to provide users with accurate and location-based forecasts. It retrieves and processes external data to display current conditions and future weather trends, enabling users to make informed decisions based on up-to-date environmental insights.",
+    technologies: ["React", "Node.js", "MongoDB", "Express", "Rest APIs"],
+    demoLink: "#",
+    githubLink: "https://github.com/TOT8894?tab=repositories",
+    featured: false
+  },
+  {
+    title: "Smart Healthcare System",
+    description: "A digital communication platform developed to enhance interaction between users through real-time messaging and data exchange. It supports continuous communication, information sharing, and user presence awareness, making it suitable for scenarios that require instant collaboration such as healthcare consultations or team coordination.",
+    technologies: ["Node.js", "Socket.io", "Express", "MongoDB", "React", "Rest APIs"],
+    demoLink: "#",
+    githubLink: "https://github.com/TOT8894?tab=repositories",
+    featured: false
+  }
+];
 
   return (
     <section id="projects" className="projects-section">
