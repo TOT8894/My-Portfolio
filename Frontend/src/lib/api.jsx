@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api/v1'
+const API_BASE_URL = 'https://my-portfolio-1-uev3.onrender.com/api/v1'
 
 export const contactAPI = {
   submitContact: async (formData) => {
