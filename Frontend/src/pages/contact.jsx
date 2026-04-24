@@ -254,7 +254,7 @@ export const Contact = () => {
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    placeholder="Tell me about your project..."
+                    placeholder="Your comments ..."
                     rows="5"
                     className={errors.message ? 'error' : ''}
                   ></textarea>

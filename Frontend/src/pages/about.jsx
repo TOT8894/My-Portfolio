@@ -1,30 +1,24 @@
 import './about.css'
 import image from "../assets/profile.jpg"
 
-import './about.css'
-
 export const About = () => {
-//   const education = [
-//     {
-//       degree: "Bachelor of Science in Computer Science",
-//       school: "Addis Ababa University",
-//       year: "2019 - 2023",
-//       description: "Specialized in Software Engineering and Web Development"
-//     },
-//     {
-//       degree: "Full Stack Web Development Certification",
-//       school: "Coursera & Udemy",
-//       year: "2022 - 2023",
-//       description: "Intensive training in modern web technologies"
-//     }
-//   ]
+
+  const education = [
+    {
+      student: "Software Engineering Student",
+      school: "Addis Ababa Science and Technology University",
+      year: "2024 - Present",
+      description: "Focused on software development, and modern web technologies."
+    }
+  ]
 
   const highlights = [
-    "Proficient in JavaScript, React, Node.js, and MongoDB",
-    "Experience with RESTful APIs, Git, and Agile methodologies",
-    "Strong problem-solving skills and attention to detail",
-    "Excellent communication and teamwork abilities",
-    "Passionate about learning new technologies and improving skills"
+    "Strong foundation in JavaScript, React, Node.js, and MongoDB",
+    "Experience building responsive and user-friendly web applications",
+    "Familiar with RESTful API development and integration",
+    "Knowledge of version control using Git and GitHub",
+    "Quick learner with a passion for continuous improvement",
+    "Team work and collaboration skills, with experience working on group projects",
   ]
 
   return (
@@ -36,37 +30,45 @@ export const About = () => {
         <p className="section-subtitle">Get to know the person behind the code</p>
 
         <div className="about-content">
+          
+          {/* IMAGE */}
           <div className="about-image-wrapper">
             <div className="about-image">
-                <img className='img' src={image} alt="Profile Image" />
+              <img className='img' src={image} alt="Profile" />
             </div>
             <div className="image-decoration"></div>
           </div>
 
+          {/* INFO */}
           <div className="about-info">
-            <h3 className="about-heading">Professional Summary</h3>
+            
+            <h3 className="about-heading">Profile</h3>
+
             <p className="about-text">
-              hello
-            </p>
-            <p className="about-text">
-             hello
+              I am a passionate junior Full Stack Developer with a solid foundation in building modern web applications using JavaScript, React, Node.js, and MongoDB. I focus on creating clean, responsive, and user-friendly interfaces while also developing efficient backend systems.
             </p>
 
+            <p className="about-text">
+              As a beginner in the professional field, I am actively strengthening my skills by working on real-world projects and continuously learning new technologies. I enjoy solving problems, writing maintainable code, and collaborating with others to build meaningful digital solutions.
+            </p>
+
+            {/* EDUCATION */}
             <h3 className="about-heading">Education</h3>
-            {/* <div className="education-list">
+            <div className="education-list">
               {education.map((edu, index) => (
                 <div key={index} className="education-item">
                   <div className="edu-dot"></div>
                   <div className="edu-content">
-                    <h4>{edu.degree}</h4>
+                    <h4>{edu.student}</h4>
                     <p className="edu-school">{edu.school}</p>
                     <span className="edu-year">{edu.year}</span>
                     <p className="edu-desc">{edu.description}</p>
                   </div>
                 </div>
               ))}
-            </div> */}
+            </div>
 
+            {/* HIGHLIGHTS */}
             <h3 className="about-heading">Key Highlights</h3>
             <ul className="highlights-list">
               {highlights.map((highlight, index) => (
@@ -77,6 +79,7 @@ export const About = () => {
               ))}
             </ul>
 
+            {/* DOWNLOAD CV */}
             <a 
               href="/resume.pdf" 
               className="btn-primary download-btn"
@@ -89,6 +92,7 @@ export const About = () => {
               </svg>
               Download CV
             </a>
+
           </div>
         </div>
       </div>

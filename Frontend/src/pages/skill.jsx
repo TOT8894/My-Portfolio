@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './skill.css'
 
 export const Skill = () => {
-  const [animatedSkills, setAnimatedSkills] = useState({})
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef(null)
 
   const skillCategories = [
     {
@@ -11,7 +12,8 @@ export const Skill = () => {
       skills: [
         { name: "React", level: 75 },
         { name: "JavaScript", level: 90 },
-        { name: "HTML/CSS", level: 95 }
+        { name: "HTML", level: 95 },
+        { name: "CSS", level: 95 }
       ]
     },
     {
@@ -19,7 +21,6 @@ export const Skill = () => {
       icon: "⚙️",
       skills: [
         { name: "Node.js", level: 85 },
-        { name: "Python", level: 80 },
         { name: "Express", level: 85 },
         { name: "MongoDB", level: 80 },
         { name: "REST APIs", level: 90 },
@@ -49,24 +50,24 @@ export const Skill = () => {
   ]
 
   useEffect(() => {
-    const handleScroll = () => {
-      const skillBars = document.querySelectorAll('.skill-progress-fill')
-      skillBars.forEach((bar, index) => {
-        const rect = bar.getBoundingClientRect()
-        if (rect.top < window.innerHeight * 0.8) {
-          setTimeout(() => {
-            setAnimatedSkills(prev => ({ ...prev, [index]: true }))
-          }, index * 100)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
         }
-      })
+      },
+      { threshold: 0.3 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
     }
-    window.addEventListener('scroll', handleScroll)
-    handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
+
+    return () => observer.disconnect()
   }, [])
 
   return (
-    <section id="skills" className="skills-section">
+    <section ref={sectionRef} id="skills" className="skills-section">
       <div className="skills-container">
         <h2 className="section-title">
           My <span className="gradient-text">Skills</span>
@@ -83,21 +84,25 @@ export const Skill = () => {
 
               <div className="skills-list">
                 {category.skills.map((skill, skillIndex) => {
-                  const globalIndex = catIndex * 10 + skillIndex
-                  const isAnimated = animatedSkills[globalIndex]
-                  
+                  const delay = (catIndex * 5 + skillIndex) * 100
+
                   return (
                     <div key={skillIndex} className="skill-item">
                       <div className="skill-info">
                         <span className="skill-name">{skill.name}</span>
                         <span className="skill-percentage">{skill.level}%</span>
                       </div>
+
                       <div className="skill-progress">
-                        <div 
+                        <div
                           className="skill-progress-fill"
-                          style={{ width: isAnimated ? `${skill.level}%` : '0%' }}
+                          style={{
+                            width: isVisible ? `${skill.level}%` : '0%',
+                            transition: `width 1s ease ${delay}ms`
+                          }}
                         ></div>
                       </div>
+
                     </div>
                   )
                 })}

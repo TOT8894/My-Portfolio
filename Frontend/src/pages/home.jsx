@@ -3,7 +3,7 @@ import './home.css'
 
 export const Home = () => {
   const [text, setText] = useState('')
-  const fullText = "Backend Developer"
+  const fullText = "Junior Full Stack Developer"
   const [showCursor, setShowCursor] = useState(true)
 
   useEffect(() => {
@@ -35,6 +35,7 @@ export const Home = () => {
 
   return (
     <section id="home" className="home-section">
+      
       {/* Background effects */}
       <div className="bg-effects">
         <div className="gradient-orb orb-1"></div>
@@ -43,25 +44,32 @@ export const Home = () => {
       </div>
 
       <div className="home-content">
+
+        {/* STATUS BADGE */}
         <div className="hero-badge">
           <span className="badge-dot"></span>
-                    Ready For Intership
+          Open to Internship Opportunities
         </div>
 
+        {/* NAME */}
         <h1 className="hero-title">
           Hi, I'm <span className="gradient-text">Shanbel Dires</span>
         </h1>
 
+        {/* ROLE */}
         <h2 className="hero-subtitle">
           {text}
           <span className={`cursor ${showCursor ? 'visible' : 'hidden'}`}>|</span>
         </h2>
 
+        {/* PROFESSIONAL DESCRIPTION */}
         <p className="hero-description">
-          Building elegant solutions with modern technologies. 
-          Passionate about creating exceptional digital experiences.
+          I build scalable and user-focused web applications using modern technologies. <br />
+          Passionate about contributing to the digital ecosystem by developing efficient, <br />
+          reliable, and impactful software solutions that solve real-world problems.<br />
         </p>
 
+        {/* BUTTONS */}
         <div className="hero-buttons">
           <button 
             className="btn-primary"
@@ -77,12 +85,15 @@ export const Home = () => {
           </button>
         </div>
 
+        {/* STATS */}
         <div className="hero-stats">
           <div className="stat-item">
-            <span className="stat-number">Experience</span>
-            <span className="stat-label">Intermidiate </span>
+            <span className="stat-number">Level</span>
+            <span className="stat-label">Junior Developer</span>
           </div>
+
           <div className="stat-divider"></div>
+
           <div className="stat-item">
             <span className="stat-number">5+</span>
             <span className="stat-label">Projects Completed</span>
@@ -90,6 +101,7 @@ export const Home = () => {
         </div>
       </div>
 
+      {/* SCROLL INDICATOR */}
       <div className="scroll-indicator" onClick={() => scrollToSection('#about')}>
         <div className="mouse">
           <div className="wheel"></div>
