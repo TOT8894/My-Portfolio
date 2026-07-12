@@ -7,7 +7,7 @@ const projects = [
     description: "A scalable online shopping platform designed to help businesses manage products, users, and transactions in one system. It enables customers to browse products, securely authenticate, add items to a cart, and complete purchases through integrated payment processing, while administrators control inventory, orders, and overall store operations through a centralized dashboard.",
     technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe"],
     demoLink: "#",
-    githubLink: "https://github.com/TOT8894?tab=repositories",
+    githubLink: "https://github.com/TOT8894/Ecommerce-platform",
     featured: true
   },
   {
@@ -15,7 +15,7 @@ const projects = [
     description: "A collaborative task management system built to improve team productivity and workflow transparency. It allows teams to organize tasks within shared workspaces, track progress in real time, and manage task lifecycles through an interactive board, ensuring better coordination, accountability, and efficient project execution.",
     technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe", "Rest APIs"],
     demoLink: "#",
-    githubLink: "https://github.com/TOT8894?tab=repositories",
+    githubLink: "https://github.com/TOT8894/Employee-Management-System",
     featured: true
   },
   {
@@ -23,7 +23,7 @@ const projects = [
     description: "A modern personal portfolio platform created to showcase skills, projects, and professional identity through an interactive and responsive interface. It delivers a smooth user experience with dynamic content rendering, theme customization, and seamless navigation, helping present technical expertise in a visually engaging and accessible way.",
     technologies: ["React", "Node.js", "MongoDB", "Express", "Rest APIs"],
     demoLink: "#",
-    githubLink: "https://github.com/TOT8894?tab=repositories",
+    githubLink: "https://github.com/TOT8894/My-Portfolio",
     featured: true
   },
   {
