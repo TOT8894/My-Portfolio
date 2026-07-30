@@ -20,6 +20,7 @@
   background: #0f172a;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: 4rem 20px 2rem;
+  position: relative;
 }
 
 .footer-container {
