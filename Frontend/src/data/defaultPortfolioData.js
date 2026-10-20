@@ -63,7 +63,7 @@ export const DEFAULT_DATA = {
     email: "shanbeldires8@gmail.com",
     phone: "0988946528",
     telegram: "@TOT8894",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQHeNKet6pmZzA/profile-displayphoto-scale_400_400/B4EZ42LlmpGYAg-/0/1779025471216?e=1793836800&v=beta&t=V-3lJR2P6Zyn8_O3qP-Gw1xYrI3ritdS8NI7wKghuL4",
     aboutBio: "Passionate software engineer and network infrastructure specialist based in Addis Ababa. I bridge the gap between robust physical infrastructure and modern web software—specializing in high-performance full-stack web applications, real-time microservices, HCIA-certified network topologies, and intelligent IP surveillance ecosystems.",
     stats: [
       { label: "Years Experience of programming", value: "2+" },
