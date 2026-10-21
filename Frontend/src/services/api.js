@@ -143,6 +143,7 @@ export const portfolioService = {
   getMessages: () => api.get('/contact/messages'),
   markMessageRead: (id) => api.patch(`/contact/messages/${id}/read`),
   deleteMessage: (id) => api.delete(`/contact/messages/${id}`),
+  sendDirectEmail: (emailData) => api.post('/contact/send-email', emailData),
 
   // Upload to Cloudinary via backend
   uploadImage: (formData) => api.post('/upload', formData, {
