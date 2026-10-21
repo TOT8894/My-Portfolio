@@ -28,7 +28,11 @@ import {
   CheckCircle,
   Copy,
   Download,
-  FileText
+  FileText,
+  Send,
+  Eye,
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { portfolioService } from '../../services/api';
@@ -78,11 +82,34 @@ export default function AdminDashboard() {
     isActive: true,
   });
 
+  // Direct Email Dispatcher State (Glowing Modern Light Mode UI)
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    recipientEmail: '',
+    recipientName: '',
+    subject: '',
+    message: '',
+    messageId: null,
+    companyName: '',
+    serviceArea: '',
+    businessHighlights: '',
+    buttonText: 'View Portfolio & Work',
+  });
+
+  // Keep forms in sync with fetched database portfolio data
   useEffect(() => {
+    if (portfolioData?.profile && Object.keys(portfolioData.profile).length > 0) {
+      setProfileForm((prev) => ({ ...prev, ...portfolioData.profile }));
+    }
+    if (portfolioData?.announcement) {
+      setAnnouncementForm((prev) => ({ ...prev, ...portfolioData.announcement }));
+    }
     if (portfolioData?.cv) {
       setCvForm(portfolioData.cv);
     }
-  }, [portfolioData?.cv]);
+  }, [portfolioData]);
 
   const handleSaveCV = async (e) => {
     e.preventDefault();
@@ -171,7 +198,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Image Upload Helper (Single Image)
+  // Image Upload Helper (Single File / Photo to Cloudinary)
   const handleImageUpload = async (file, onUploaded) => {
     if (!file) return;
     setUploading(true);
@@ -182,18 +209,17 @@ export default function AdminDashboard() {
       const res = await portfolioService.uploadImage(formData);
       if (res.data?.url) {
         onUploaded(res.data.url);
-        showNotification('Image uploaded successfully to Cloudinary!');
+        showNotification('File uploaded successfully to Cloudinary!');
       }
     } catch (err) {
-      const localUrl = URL.createObjectURL(file);
-      onUploaded(localUrl);
-      showNotification('Image loaded for preview.');
+      const errMsg = err.response?.data?.message || err.message || 'Upload failed.';
+      showNotification(`Cloudinary upload failed: ${errMsg}`, true);
     } finally {
       setUploading(false);
     }
   };
 
-  // Multi-Image Upload Helper (Uploads Multiple Images at once to Cloudinary)
+  // Multi-Image Upload Helper (Uploads Multiple Photos at once directly to Cloudinary)
   const handleMultipleImageUpload = async (files, onUploaded) => {
     if (!files || files.length === 0) return;
     setUploading(true);
@@ -206,16 +232,11 @@ export default function AdminDashboard() {
       const res = await portfolioService.uploadMultipleImages(formData);
       if (res.data?.urls && res.data.urls.length > 0) {
         onUploaded(res.data.urls);
-        showNotification(`${res.data.urls.length} images uploaded successfully to Cloudinary!`);
-      } else {
-        const localUrls = Array.from(files).map((f) => URL.createObjectURL(f));
-        onUploaded(localUrls);
-        showNotification(`${localUrls.length} images loaded locally for preview.`);
+        showNotification(`${res.data.urls.length} photos uploaded directly to Cloudinary!`);
       }
     } catch (err) {
-      const localUrls = Array.from(files).map((f) => URL.createObjectURL(f));
-      onUploaded(localUrls);
-      showNotification(`${localUrls.length} images loaded for preview.`);
+      const errMsg = err.response?.data?.message || err.message || 'Upload failed.';
+      showNotification(`Cloudinary batch upload failed: ${errMsg}`, true);
     } finally {
       setUploading(false);
     }
@@ -508,6 +529,113 @@ export default function AdminDashboard() {
     showNotification('Message removed from inbox.');
   };
 
+  // Direct Email Dispatcher Handlers
+  const handleOpenEmailModal = (msg = null) => {
+    const authorName = portfolioData?.profile?.name || 'Shanbel Dires';
+    const authorRole = portfolioData?.profile?.role || 'Full-Stack Software Engineer & Network Architect';
+
+    if (msg) {
+      setEmailForm({
+        recipientEmail: msg.email || '',
+        recipientName: msg.name || '',
+        subject: msg.subject ? `Re: ${msg.subject}` : `Regarding your inquiry on ${authorName} Portfolio`,
+        message: `Hi ${msg.name || 'there'},\n\nThank you for reaching out through my portfolio. I reviewed your inquiry regarding "${msg.subject || 'your project'}" and would love to discuss how we can work together.\n\n`,
+        messageId: msg.id || null,
+        companyName: '',
+        serviceArea: '',
+        businessHighlights: '',
+        buttonText: 'View Portfolio & Work',
+      });
+    } else {
+      setEmailForm({
+        recipientEmail: '',
+        recipientName: '',
+        subject: `Connecting from ${authorName} Portfolio`,
+        message: `Hi,\n\nI am reaching out to connect regarding engineering and technology initiatives.\n\nBest regards,\n${authorName}\n${authorRole}`,
+        messageId: null,
+        companyName: '',
+        serviceArea: '',
+        businessHighlights: '',
+        buttonText: 'View Portfolio & Work',
+      });
+    }
+    setShowEmailPreview(false);
+    setIsEmailModalOpen(true);
+  };
+
+  const handleSendDirectEmail = async (e) => {
+    e.preventDefault();
+    if (!emailForm.recipientEmail || !emailForm.subject || !emailForm.message) {
+      showNotification('Please fill in all required email fields.', true);
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      await portfolioService.sendDirectEmail(emailForm);
+      showNotification(`✨ Email dispatched successfully to ${emailForm.recipientEmail}!`);
+      
+      // If replying to a message, mark as read locally too
+      if (emailForm.messageId) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === emailForm.messageId
+              ? { ...m, isRead: true, replied: true }
+              : m
+          )
+        );
+      }
+
+      setIsEmailModalOpen(false);
+      setEmailForm({
+        recipientEmail: '',
+        recipientName: '',
+        subject: '',
+        message: '',
+        messageId: null,
+        companyName: '',
+        serviceArea: '',
+        businessHighlights: '',
+        buttonText: 'View Portfolio & Work',
+      });
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message || 'Failed to dispatch email.';
+      showNotification(`Failed to send email: ${errMsg}`, true);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  const applyEmailTemplate = (templateType) => {
+    const name = emailForm.recipientName || 'there';
+    const authorName = portfolioData?.profile?.name || 'Shanbel Dires';
+    const authorRole = portfolioData?.profile?.role || 'Full-Stack Software Engineer & Network Architect';
+    const authorPhone = portfolioData?.profile?.phone || '+251 991 185 321';
+
+    if (templateType === 'consultation') {
+      setEmailForm((prev) => ({
+        ...prev,
+        subject: prev.subject || `Consultation & Engineering Discussion - ${authorName}`,
+        message: `Hi ${name},\n\nThank you for reaching out! I specialize in enterprise network architecture and high-performance full-stack systems, and I would be delighted to consult with you on this project.\n\nCould we schedule a brief 15-minute introductory discussion or connect directly via Phone / WhatsApp (${authorPhone})?\n\nLooking forward to collaborating with you.\n\nBest regards,\n${authorName}\n${authorRole}`,
+        buttonText: 'Discuss Project & View Portfolio',
+      }));
+    } else if (templateType === 'followup') {
+      setEmailForm((prev) => ({
+        ...prev,
+        subject: prev.subject || `Follow-up on Your Portfolio Inquiry - ${authorName}`,
+        message: `Hi ${name},\n\nI wanted to follow up on your recent message through my portfolio. I have prepared architectural insights and technical recommendations that match your project requirements.\n\nPlease feel free to check out my latest case studies on my portfolio or reach me directly anytime.\n\nBest regards,\n${authorName}`,
+        buttonText: 'Review Case Studies & Portfolio',
+      }));
+    } else if (templateType === 'general') {
+      setEmailForm((prev) => ({
+        ...prev,
+        subject: prev.subject || `Greetings from ${authorName}`,
+        message: `Hi ${name},\n\nI hope this email finds you well.\n\nI am ${authorName}, ${authorRole}. I am writing to connect and explore how my engineering experience can bring value to your upcoming initiatives.\n\nFeel free to explore my full portfolio and contact me directly anytime.\n\nBest regards,\n${authorName}`,
+        buttonText: 'View Portfolio & Work',
+      }));
+    }
+  };
+
   return (
     <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       
@@ -533,14 +661,21 @@ export default function AdminDashboard() {
                 Manage all portfolio content, multi-image Cloudinary galleries, and incoming visitor inquiries.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleOpenEmailModal(null)}
+                className="px-4 py-2 bg-emerald-600 hover:bg-white hover:text-black text-white text-xs font-bold rounded-xl transition-all duration-300 shadow flex items-center gap-1.5 border border-transparent hover:border-black active:scale-95"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Contact Someone</span>
+              </button>
               <button
                 onClick={() => {
                   refreshPortfolioData();
                   fetchMessages();
                   showNotification('Synced latest data with database & storage.');
                 }}
-                className="px-4 py-2 bg-emerald-600 hover:bg-white hover:text-black text-white text-xs font-bold rounded-xl transition-all duration-300 shadow active:scale-95 border border-transparent hover:border-black"
+                className="px-4 py-2 bg-slate-100 dark:bg-neutral-900 text-slate-700 dark:text-neutral-300 hover:bg-slate-200 dark:hover:bg-neutral-800 text-xs font-bold rounded-xl transition-all duration-300 shadow active:scale-95 border border-slate-200 dark:border-neutral-800"
               >
                 Refresh Data
               </button>
@@ -601,12 +736,13 @@ export default function AdminDashboard() {
                       <p className="text-slate-500 line-clamp-1 mt-0.5">{m.message}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <a
-                        href={`mailto:${m.email}?subject=Re: ${encodeURIComponent(m.subject || '')}`}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-white hover:text-black text-white rounded-lg text-[11px] font-bold border border-transparent hover:border-black transition-all"
+                      <button
+                        onClick={() => handleOpenEmailModal(m)}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-white hover:text-black text-white rounded-lg text-[11px] font-bold border border-transparent hover:border-black transition-all flex items-center gap-1 active:scale-95 shadow"
                       >
-                        Reply
-                      </a>
+                        <Send className="w-3 h-3" />
+                        <span>Contact Them</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -627,6 +763,50 @@ export default function AdminDashboard() {
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-5 text-xs">
+            {/* AVATAR / PROFILE PHOTO (CLOUDINARY) */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 flex flex-col sm:flex-row items-center gap-4">
+              <div className="relative group shrink-0">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-emerald-500/40 bg-white dark:bg-black shadow">
+                  <img
+                    src={profileForm.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"}
+                    alt="Profile Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 space-y-1.5 w-full">
+                <label className="block font-bold text-slate-800 dark:text-neutral-200">
+                  Profile Photo / Avatar (Saved to Database & Cloudinary)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={profileForm.avatar || ''}
+                    onChange={(e) => setProfileForm({ ...profileForm, avatar: e.target.value })}
+                    placeholder="https://res.cloudinary.com/..."
+                    className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs font-mono"
+                  />
+                  <label className="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-white hover:text-black text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow border border-transparent hover:border-black transition-all">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          handleImageUpload(file, (url) => {
+                            setProfileForm((prev) => ({ ...prev, avatar: url }));
+                          });
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block font-bold mb-1">Full Legal Name</label>
@@ -1235,31 +1415,50 @@ export default function AdminDashboard() {
           ========================================================================= */}
       {activeTab === 'messages' && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
             <div>
               <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                 Contact Messages & Inquiries ({messages.length})
               </h2>
               <p className="text-xs text-slate-500">All submissions delivered to your dashboard and emailed directly to your inbox.</p>
             </div>
-            <button
-              onClick={() => {
-                fetchMessages();
-                showNotification('Inbox refreshed.');
-              }}
-              className="px-3.5 py-1.5 bg-slate-100 dark:bg-neutral-900 text-slate-700 dark:text-neutral-300 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-bold transition-all"
-            >
-              Check for New Messages
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => handleOpenEmailModal(null)}
+                className="px-4 py-2 bg-emerald-600 hover:bg-white hover:text-black text-white text-xs font-bold rounded-xl transition-all duration-300 shadow flex items-center gap-2 border border-transparent hover:border-black active:scale-95"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Contact Someone (Compose Email)</span>
+              </button>
+              <button
+                onClick={() => {
+                  fetchMessages();
+                  showNotification('Inbox refreshed.');
+                }}
+                className="px-3.5 py-2 bg-slate-100 dark:bg-neutral-900 text-slate-700 dark:text-neutral-300 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Refresh Inbox</span>
+              </button>
+            </div>
           </div>
 
           {messages.length === 0 ? (
-            <div className="bg-white dark:bg-neutral-950 p-12 rounded-3xl border border-slate-200 dark:border-neutral-900 text-center space-y-3">
+            <div className="bg-white dark:bg-neutral-950 p-12 rounded-3xl border border-slate-200 dark:border-neutral-900 text-center space-y-4">
               <MessageSquare className="w-10 h-10 text-slate-300 dark:text-neutral-700 mx-auto" />
-              <h3 className="font-bold text-sm">Inbox is Empty</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                No visitor inquiries yet. Messages submitted via your portfolio contact form will display here with full details.
-              </p>
+              <div className="space-y-1">
+                <h3 className="font-bold text-sm">Inbox is Empty</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  No visitor inquiries yet. You can also proactively contact any client, recruiter, or collaborator directly.
+                </p>
+              </div>
+              <button
+                onClick={() => handleOpenEmailModal(null)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-white hover:text-black text-white text-xs font-bold rounded-xl border border-transparent hover:border-black transition-all shadow-md active:scale-95"
+              >
+                <Send className="w-4 h-4" />
+                <span>Compose New Direct Email</span>
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
@@ -1286,6 +1485,11 @@ export default function AdminDashboard() {
                         ) : (
                           <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-neutral-900 text-slate-500 font-bold text-[10px]">
                             Reviewed
+                          </span>
+                        )}
+                        {msg.replied && (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 border border-emerald-500/30 text-[10px] font-bold">
+                            ✓ Replied
                           </span>
                         )}
                       </div>
@@ -1354,7 +1558,7 @@ export default function AdminDashboard() {
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {msg.phone && (
                         <a
                           href={`tel:${msg.phone}`}
@@ -1365,12 +1569,21 @@ export default function AdminDashboard() {
                         </a>
                       )}
 
+                      <button
+                        onClick={() => handleOpenEmailModal(msg)}
+                        className="px-5 py-2 bg-emerald-600 hover:bg-white hover:text-black text-white text-xs font-extrabold rounded-xl transition-all shadow-md border border-transparent hover:border-black flex items-center gap-1.5 active:scale-95"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Contact Them (Send Email)</span>
+                      </button>
+
                       <a
                         href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject || 'Portfolio Inquiry')}`}
-                        className="px-5 py-2 bg-emerald-600 hover:bg-white hover:text-black text-white text-xs font-bold rounded-xl transition-all shadow border border-transparent hover:border-black flex items-center gap-1.5"
+                        className="px-3.5 py-2 bg-slate-100 dark:bg-neutral-900 hover:bg-slate-200 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5"
+                        title="Open in Gmail / Default Client"
                       >
                         <Mail className="w-3.5 h-3.5" />
-                        <span>Reply via Email</span>
+                        <span>Gmail</span>
                       </a>
                     </div>
                   </div>
@@ -2154,6 +2367,386 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          DIRECT EMAIL DISPATCHER MODAL (GLOWING MODERN UI)
+          ========================================================================= */}
+      {isEmailModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white dark:bg-neutral-950 rounded-3xl max-w-2xl w-full p-6 sm:p-8 max-h-[92vh] overflow-y-auto border border-slate-200 dark:border-neutral-900 shadow-2xl space-y-5">
+            
+            {/* Header */}
+            <div className="flex justify-between items-start pb-4 border-b border-slate-100 dark:border-neutral-900">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold uppercase tracking-wider mb-1.5">
+                  <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
+                  <span>Interactive Glowing Email Dispatcher</span>
+                </div>
+                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                  {emailForm.messageId ? `Reply to ${emailForm.recipientName || 'Visitor'}` : 'Contact Someone (Direct Transmission)'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Sends directly from your verified email service with modern glowing dark/emerald HTML & CSS.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEmailModalOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-neutral-900 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Quick Fill Templates Bar */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Quick Fill Templates:</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => applyEmailTemplate('consultation')}
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-neutral-900 hover:bg-emerald-600 hover:text-white text-slate-700 dark:text-neutral-300 text-[11px] font-bold transition-all border border-slate-200 dark:border-neutral-800"
+                >
+                  ⚡ Consultation Offer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyEmailTemplate('followup')}
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-neutral-900 hover:bg-emerald-600 hover:text-white text-slate-700 dark:text-neutral-300 text-[11px] font-bold transition-all border border-slate-200 dark:border-neutral-800"
+                >
+                  💬 Inquiry Follow-Up
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyEmailTemplate('general')}
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-neutral-900 hover:bg-emerald-600 hover:text-white text-slate-700 dark:text-neutral-300 text-[11px] font-bold transition-all border border-slate-200 dark:border-neutral-800"
+                >
+                  🌐 General Introduction
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs / Toggle Preview */}
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-neutral-900 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setShowEmailPreview(false)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    !showEmailPreview
+                      ? 'bg-white dark:bg-neutral-950 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Edit Message
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEmailPreview(true)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    showEmailPreview
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Preview Glowing UI</span>
+                </button>
+              </div>
+
+              <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                Includes link redirecting to your portfolio contact page
+              </span>
+            </div>
+
+            {/* Form Mode */}
+            {!showEmailPreview ? (
+              <form onSubmit={handleSendDirectEmail} className="space-y-4 text-xs">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold mb-1 text-slate-700 dark:text-neutral-300">
+                      Recipient Name
+                    </label>
+                    <input
+                      type="text"
+                      value={emailForm.recipientName}
+                      onChange={(e) => setEmailForm({ ...emailForm, recipientName: e.target.value })}
+                      placeholder="e.g. Dr. Dawit Mengistu"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1 text-slate-700 dark:text-neutral-300">
+                      Recipient Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={emailForm.recipientEmail}
+                      onChange={(e) => setEmailForm({ ...emailForm, recipientEmail: e.target.value })}
+                      placeholder="e.g. dawit.m@telecom-tech.et"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-slate-700 dark:text-neutral-300">
+                    Subject Line *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={emailForm.subject}
+                    onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                    placeholder="e.g. Re: Technical Proposal - Enterprise Software Architecture"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block font-bold text-slate-700 dark:text-neutral-300">
+                      Message Content *
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      {emailForm.message.length} characters
+                    </span>
+                  </div>
+                  <textarea
+                    rows="7"
+                    required
+                    value={emailForm.message}
+                    onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                    placeholder="Write your direct email message here..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs font-medium leading-relaxed focus:ring-2 focus:ring-emerald-500 outline-none font-sans"
+                  ></textarea>
+                </div>
+
+                {/* OPTIONAL ENTERPRISE / BUSINESS FIELDS */}
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-neutral-900/70 border border-slate-200 dark:border-neutral-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-extrabold text-xs text-slate-800 dark:text-neutral-200 flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Enterprise & Business Context (Optional)</span>
+                    </h4>
+                    <span className="text-[10px] text-slate-400 italic">Omitted entirely if left empty</span>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-semibold mb-1 text-[11px] text-slate-600 dark:text-neutral-400">
+                        Organization / Client Name
+                      </label>
+                      <input
+                        type="text"
+                        value={emailForm.companyName}
+                        onChange={(e) => setEmailForm({ ...emailForm, companyName: e.target.value })}
+                        placeholder="e.g. Ethio Telecom / FinTech Enterprise"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-semibold mb-1 text-[11px] text-slate-600 dark:text-neutral-400">
+                        Focus / Service Area
+                      </label>
+                      <input
+                        type="text"
+                        value={emailForm.serviceArea}
+                        onChange={(e) => setEmailForm({ ...emailForm, serviceArea: e.target.value })}
+                        placeholder="e.g. Cloud Infrastructure & Microservices"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1 text-[11px] text-slate-600 dark:text-neutral-400">
+                      Key Scope / Value Proposition
+                    </label>
+                    <textarea
+                      rows="2"
+                      value={emailForm.businessHighlights}
+                      onChange={(e) => setEmailForm({ ...emailForm, businessHighlights: e.target.value })}
+                      placeholder="e.g. End-to-end network topology re-engineering with 99.99% uptime guarantee."
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs"
+                    ></textarea>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1 text-[11px] text-slate-600 dark:text-neutral-400">
+                      Button CTA Label (Human-Crafted)
+                    </label>
+                    <input
+                      type="text"
+                      value={emailForm.buttonText}
+                      onChange={(e) => setEmailForm({ ...emailForm, buttonText: e.target.value })}
+                      placeholder="View Portfolio & Work"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-black text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 dark:border-neutral-900 flex justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsEmailModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border text-xs font-semibold hover:bg-slate-100 dark:hover:bg-neutral-900 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={sendingEmail}
+                    className="px-6 py-2.5 bg-emerald-600 hover:bg-white hover:text-black text-white rounded-xl text-xs font-bold border border-transparent hover:border-black transition-all shadow-lg active:scale-95 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {sendingEmail ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Sending Transmission...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Send Email Directly</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* Live Preview of Glowing Day Mode Email UI */
+              <div className="space-y-4">
+                <div className="p-1 rounded-3xl bg-gradient-to-br from-emerald-500/40 via-emerald-600/10 to-emerald-500/40 shadow-xl">
+                  <div className="bg-white rounded-[22px] p-6 text-slate-900 space-y-4 font-sans text-xs border border-emerald-500/20 shadow-sm">
+                    
+                    {/* Header Badge (Light Mode) */}
+                    <div className="inline-block px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold tracking-wider">
+                      Direct Message from {portfolioData?.profile?.name || 'Shanbel Dires'}
+                    </div>
+
+                    <div>
+                      <h4 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                        {portfolioData?.profile?.name || 'Shanbel Dires'}
+                      </h4>
+                      <p className="text-emerald-600 font-bold text-[11px]">
+                        {portfolioData?.profile?.role || 'Full-Stack Software Engineer & Network Architect'}
+                      </p>
+                      <p className="text-slate-500 text-[10px]">
+                        {portfolioData?.profile?.location || 'Addis Ababa, Ethiopia'}
+                        {portfolioData?.profile?.institution ? ` • ${portfolioData.profile.institution}` : ''}
+                      </p>
+                    </div>
+
+                    <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500/80 via-emerald-500/20 to-transparent rounded-full"></div>
+
+                    {/* Non-duplicated Greeting */}
+                    {!/^(hi|hello|dear|hey|good\s+(morning|afternoon|evening))\b/i.test(emailForm.message?.trim() || '') && emailForm.recipientName && (
+                      <p className="font-bold text-slate-900">
+                        Hi {emailForm.recipientName},
+                      </p>
+                    )}
+
+                    {/* Optional Business / Enterprise Section (Strictly Omitted if Empty) */}
+                    {(emailForm.companyName?.trim() || emailForm.serviceArea?.trim() || emailForm.businessHighlights?.trim()) ? (
+                      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 border-l-4 border-l-emerald-600 space-y-2 text-xs">
+                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">
+                          Enterprise Context & Scope
+                        </div>
+                        {emailForm.companyName?.trim() && (
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <span className="text-slate-500 font-semibold text-[11px]">Organization / Client:</span>
+                            <span className="text-slate-900 font-bold text-[11px]">{emailForm.companyName.trim()}</span>
+                          </div>
+                        )}
+                        {emailForm.serviceArea?.trim() && (
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <span className="text-slate-500 font-semibold text-[11px]">Focus / Service Area:</span>
+                            <span className="text-emerald-700 font-bold text-[11px]">{emailForm.serviceArea.trim()}</span>
+                          </div>
+                        )}
+                        {emailForm.businessHighlights?.trim() && (
+                          <div className="pt-1 border-t border-slate-200/60">
+                            <span className="text-slate-500 font-semibold text-[11px] block mb-0.5">Key Scope / Value:</span>
+                            <p className="text-slate-800 text-[11px] leading-relaxed whitespace-pre-wrap">{emailForm.businessHighlights.trim()}</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+
+                    {/* Message Body */}
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 border-l-4 border-l-emerald-500 text-slate-800 whitespace-pre-wrap leading-relaxed text-xs shadow-sm">
+                      {emailForm.message || '(Your message content will appear here...)'}
+                    </div>
+
+                    {/* Human-Made Action Button */}
+                    <div className="text-center py-2">
+                      <div className="inline-block px-7 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-md">
+                        {emailForm.buttonText?.trim() || 'View Portfolio & Work'}
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-2">
+                        Feel free to reply directly to this email or visit my portfolio.
+                      </p>
+                    </div>
+
+                    {/* Contact matrix */}
+                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5">
+                      {portfolioData?.profile?.phone && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-500 font-semibold">Direct Phone:</span>
+                          <span className="text-emerald-600 font-bold">{portfolioData.profile.phone}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Direct Email:</span>
+                        <span className="text-emerald-600 font-bold">{portfolioData?.profile?.email || 'shanbeldires8@gmail.com'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Location:</span>
+                        <span className="text-slate-800 font-medium">{portfolioData?.profile?.location || 'Addis Ababa, Ethiopia'}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-center pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                      © {new Date().getFullYear()} {portfolioData?.profile?.name || 'Shanbel Dires'}. All rights reserved.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowEmailPreview(false)}
+                    className="px-4 py-2 rounded-xl border text-xs font-semibold hover:bg-slate-100 dark:hover:bg-neutral-900"
+                  >
+                    ← Back to Edit
+                  </button>
+                  <button
+                    type="button"
+                    disabled={sendingEmail}
+                    onClick={handleSendDirectEmail}
+                    className="px-6 py-2.5 bg-emerald-600 hover:bg-white hover:text-black text-white rounded-xl text-xs font-bold border border-transparent hover:border-black transition-all shadow-lg active:scale-95 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {sendingEmail ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Sending Transmission...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Send This Email Now</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       )}
