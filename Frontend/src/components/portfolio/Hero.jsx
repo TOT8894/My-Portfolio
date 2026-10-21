@@ -18,7 +18,7 @@ export default function Hero() {
               <div className="relative group">
                 <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-3xl overflow-hidden border-4 border-emerald-500/30 shadow-2xl p-1 bg-white dark:bg-neutral-950 group-hover:border-emerald-500/70 transition-all duration-500">
                   <img
-                    src={profile.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"}
+                    src={profile.avatar }
                     alt={profile.name || "Shanbel Dires"}
                     className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition duration-500"
                     onError={(e) => { e.target.style.display = 'none'; }}
@@ -42,7 +42,7 @@ export default function Hero() {
           <div className="md:col-span-8 text-center md:text-left space-y-5">
             <ScrollReveal animation="fade-left" delay={150}>
               <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Hi, I'm <span className="text-emerald-600 dark:text-emerald-500">{profile.name || "Shanbel Dires"}</span> 👋
+                Hi, I'm <span className="text-emerald-600 dark:text-emerald-500">{profile.name || "Shanbel Dires"}</span>
               </h1>
             </ScrollReveal>
 
