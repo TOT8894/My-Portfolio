@@ -53,66 +53,76 @@ export default function Projects() {
           </div>
         </ScrollReveal>
 
-        {/* 3-Column Responsive Grid with Scroll Animations */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((proj, index) => (
-            <ScrollReveal key={proj.id || proj._id} animation="fade-up" delay={index * 80}>
-              <div className="bg-white dark:bg-neutral-950 rounded-3xl overflow-hidden border border-slate-200 dark:border-neutral-900 shadow-sm hover:shadow-xl hover:border-emerald-500/40 transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between group h-full">
-                <div>
-                  {proj.image && (
-                    <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-neutral-900">
-                      <img
-                        src={proj.image}
-                        alt={proj.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
-                      {proj.category && (
-                        <span className="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-lg border border-neutral-800">
-                          {proj.category}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="p-6">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">
-                      {proj.title}
-                    </h3>
-
-                    <p className="text-slate-600 dark:text-neutral-400 text-xs sm:text-sm mt-2 line-clamp-3 leading-relaxed">
-                      {proj.shortDesc || proj.fullDesc}
-                    </p>
-
-                    {proj.tech && (
-                      <div className="flex flex-wrap gap-1.5 mt-4">
-                        {proj.tech.slice(0, 3).map((t, i) => (
-                          <span key={i} className="text-xs px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-neutral-900 text-slate-600 dark:text-neutral-300 border border-slate-200 dark:border-neutral-800">
-                            {t}
+        {/* Scrollable Container (Fixed to maximum 2 rows; scrolls internally if more than 2 rows) */}
+        <div className="max-h-[960px] overflow-y-auto pr-1 sm:pr-2 scrollbar-thin scrollbar-thumb-emerald-500/40 hover:scrollbar-thumb-emerald-500 scrollbar-track-transparent rounded-3xl p-1">
+          {/* 3-Column Responsive Grid with Scroll Animations */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-2">
+            {filteredProjects.map((proj, index) => (
+              <ScrollReveal key={proj.id || proj._id} animation="fade-up" delay={index * 80}>
+                <div className="bg-white dark:bg-neutral-950 rounded-3xl overflow-hidden border border-slate-200 dark:border-neutral-900 shadow-sm hover:shadow-xl hover:border-emerald-500/40 transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between group h-full">
+                  <div>
+                    {proj.image && (
+                      <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-neutral-900">
+                        <img
+                          src={proj.image}
+                          alt={proj.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                        {proj.category && (
+                          <span className="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-lg border border-neutral-800">
+                            {proj.category}
                           </span>
-                        ))}
-                        {proj.tech.length > 3 && (
-                          <span className="text-xs text-slate-400 self-center">+{proj.tech.length - 3}</span>
                         )}
                       </div>
                     )}
+
+                    <div className="p-6">
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">
+                        {proj.title}
+                      </h3>
+
+                      <p className="text-slate-600 dark:text-neutral-400 text-xs sm:text-sm mt-2 line-clamp-3 leading-relaxed">
+                        {proj.shortDesc || proj.fullDesc}
+                      </p>
+
+                      {proj.tech && (
+                        <div className="flex flex-wrap gap-1.5 mt-4">
+                          {proj.tech.slice(0, 3).map((t, i) => (
+                            <span key={i} className="text-xs px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-neutral-900 text-slate-600 dark:text-neutral-300 border border-slate-200 dark:border-neutral-800">
+                              {t}
+                            </span>
+                          ))}
+                          {proj.tech.length > 3 && (
+                            <span className="text-xs text-slate-400 self-center">+{proj.tech.length - 3}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* GREEN BUTTON WITH WHITE HOVER -> REDIRECTS TO DETAIL PAGE (NO POP-UP) */}
+                  <div className="p-6 pt-0">
+                    <Link
+                      to={`/details/project/${proj.id || proj._id}`}
+                      className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-white hover:text-black text-white font-semibold text-xs rounded-xl shadow transition-all duration-300 flex items-center justify-center gap-1.5 border border-transparent hover:border-black dark:hover:border-white active:scale-95"
+                    >
+                      <span>See More Details</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
                   </div>
                 </div>
-
-                {/* GREEN BUTTON WITH WHITE HOVER -> REDIRECTS TO DETAIL PAGE (NO POP-UP) */}
-                <div className="p-6 pt-0">
-                  <Link
-                    to={`/details/project/${proj.id || proj._id}`}
-                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-white hover:text-black text-white font-semibold text-xs rounded-xl shadow transition-all duration-300 flex items-center justify-center gap-1.5 border border-transparent hover:border-black dark:hover:border-white active:scale-95"
-                  >
-                    <span>See More Details</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            </ScrollReveal>
-          ))}
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
+
+        {filteredProjects.length > 6 && (
+          <p className="text-center text-xs text-slate-500 dark:text-neutral-400 mt-4 flex items-center justify-center gap-1.5 font-medium">
+            <span>Scroll inside the projects view to explore all {filteredProjects.length} projects</span>
+            <span className="animate-bounce">↓</span>
+          </p>
+        )}
 
       </div>
     </section>
