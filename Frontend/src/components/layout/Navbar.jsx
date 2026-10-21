@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, Moon, Layers, X, ShieldCheck, Download } from 'lucide-react';
+import { Sun, Moon, Menu, X, ShieldCheck, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePortfolio } from '../../context/PortfolioContext';
@@ -10,7 +10,7 @@ export default function Navbar({ darkMode, setDarkMode }) {
   const { portfolioData } = usePortfolio();
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-white/90 dark:bg-black/90 border-b border-slate-200 dark:border-neutral-900 transition-colors">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-black/95 border-b border-slate-200 dark:border-neutral-900 transition-colors shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         
         {/* Brand Logo */}
@@ -80,8 +80,9 @@ export default function Navbar({ darkMode, setDarkMode }) {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-900 transition"
+            aria-label="Toggle Navigation Menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Layers className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
