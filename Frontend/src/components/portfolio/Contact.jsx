@@ -36,7 +36,7 @@ export default function Contact() {
   const [submitError, setSubmitError] = useState(null);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setIsSubmitting(true);
     setSubmitSuccess(false);
     setSubmitError(null);
@@ -51,14 +51,26 @@ export default function Contact() {
     };
 
     try {
-      await portfolioService.sendMessage(payload);
-      setSubmitSuccess(true);
-      setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
+      const res = await portfolioService.sendMessage(payload);
+      if (res.data?.success) {
+        setSubmitSuccess(true);
+        setSubmitError(null);
+        setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
+      } else {
+        setSubmitSuccess(false);
+        setSubmitError(
+          res.data?.message || 'Message could not be delivered to Shanbel Dires email at this moment. Please click Send Again.'
+        );
+      }
     } catch (err) {
-      console.warn("Backend email dispatch response:", err.message);
-      // Seamless response in dev or local fallback mode
-      setSubmitSuccess(true);
-      setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
+      console.error("Backend contact error:", err);
+      const errMsg =
+        err.response?.data?.message ||
+        err.message ||
+        'Message could not be delivered to Shanbel Dires email at this moment. Please click Send Again.';
+      // NEVER show success text if email was not delivered
+      setSubmitSuccess(false);
+      setSubmitError(errMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -180,11 +192,14 @@ export default function Contact() {
                 {/* GREEN BUTTON WITH WHITE HOVER */}
                 <div className="pt-6">
                   <button
-                    onClick={() => setSubmitSuccess(false)}
+                    onClick={() => {
+                      setSubmitSuccess(false);
+                      setSubmitError(null);
+                    }}
                     className="w-full py-3.5 bg-emerald-600 hover:bg-white hover:text-black text-white font-bold rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm border border-transparent hover:border-black dark:hover:border-white active:scale-98"
                   >
                     <RotateCcw className="w-4 h-4" />
-                    <span>Send Another Message</span>
+                    <span>Back to Contact Form (Send Another Message)</span>
                   </button>
                 </div>
               </div>
@@ -262,9 +277,27 @@ export default function Contact() {
                     </button>
 
                     {submitError && (
-                      <div className="p-3.5 bg-red-100 dark:bg-red-950/80 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800 rounded-xl text-xs font-semibold flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                        <span>{submitError}</span>
+                      <div className="p-4 bg-red-50 dark:bg-red-950/50 border-2 border-red-500/40 rounded-2xl text-xs space-y-3 animate-shake">
+                        <div className="flex items-start gap-2.5 text-red-800 dark:text-red-300">
+                          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                          <div className="space-y-0.5">
+                            <p className="font-extrabold text-sm text-red-900 dark:text-red-200">Email Delivery Failed</p>
+                            <p className="text-slate-700 dark:text-neutral-300 leading-relaxed">
+                              {submitError}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-red-200 dark:border-red-900/60">
+                          <button
+                            type="button"
+                            onClick={handleSubmit}
+                            disabled={isSubmitting}
+                            className="px-5 py-2.5 bg-emerald-600 hover:bg-white hover:text-black text-white rounded-xl text-xs font-bold border border-transparent hover:border-black transition-all shadow-md flex items-center gap-1.5 active:scale-95"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>{isSubmitting ? 'Sending Again...' : 'Click Here to Send Again'}</span>
+                          </button>
+                        </div>
                       </div>
                     )}
                   </form>
