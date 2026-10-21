@@ -1,0 +1,150 @@
+// Prisma 6 Schema for Shanbel Dires Portfolio
+// Datasource: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String    @id @default(uuid())
+  name               String
+  email              String    @unique
+  password           String
+  refreshToken       String?   @db.Text
+  resetToken         String?
+  resetTokenExpires  DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  name        String
+  role        String
+  institution String
+  location    String
+  email       String
+  phone       String?  @default("")
+  telegram    String
+  avatar      String
+  aboutBio    String   @db.Text
+  stats       Json     // [{ label: "Years Experience", value: "3+" }, ...]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model SocialChannel {
+  id         String   @id
+  platform   String
+  handle     String
+  url        String
+  brandColor String
+  bgClass    String
+  hoverClass String
+  iconName   String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("social_channels")
+}
+
+model Specialization {
+  id                   String   @id
+  title                String
+  category             String
+  iconName             String   @default("Server")
+  shortDesc            String   @db.Text
+  detailedScope        String   @db.Text
+  image                String?  @db.Text
+  images               String[] @default([])
+  competencies         String[]
+  practicalApplication String?  @db.Text
+  skills               String[]
+  sortOrder            Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("specializations")
+}
+
+model Experience {
+  id                   String   @id
+  role                 String
+  company              String
+  period               String
+  location             String
+  shortDesc            String   @db.Text
+  fullDescription      String   @db.Text
+  image                String?  @db.Text
+  images               String[] @default([])
+  keyAchievements      String[]
+  practicalApplication String?  @db.Text
+  tech                 String[]
+  sortOrder            Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("experiences")
+}
+
+model Project {
+  id                     String   @id
+  title                  String
+  category               String
+  shortDesc              String   @db.Text
+  fullDesc               String   @db.Text
+  image                  String   @db.Text
+  images                 String[] @default([])
+  architectureHighlights String[]
+  practicalApplication   String?  @db.Text
+  tech                   String[]
+  github                 String?
+  live                   String?
+  sortOrder              Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Certificate {
+  id                   String   @id
+  title                String
+  issuer               String
+  date                 String
+  certId               String?
+  image                String   @db.Text
+  images               String[] @default([])
+  description          String   @db.Text
+  validatedSkills      String[]
+  practicalApplication String?  @db.Text
+  credentialUrl        String?
+  sortOrder            Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("certificates")
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?  @default("")
+  subject   String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
