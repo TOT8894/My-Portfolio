@@ -14,7 +14,7 @@ import { AuthProvider } from './context/AuthContext';
 
 function PublicLayout({ darkMode, setDarkMode }) {
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''} bg-white dark:bg-black text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300 overflow-x-hidden`}>
+    <div className={`min-h-screen ${darkMode ? 'dark' : ''} bg-white dark:bg-black text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300`}>
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
       <Outlet />
       <Footer />
