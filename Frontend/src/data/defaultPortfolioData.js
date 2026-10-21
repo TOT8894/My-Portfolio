@@ -1,0 +1,50 @@
+import {
+  Github,
+  Linkedin,
+  Mail,
+  MapPin,
+  Send,
+  Shield,
+  Server,
+  Code,
+  Award,
+  Tv,
+  Globe,
+  Briefcase,
+  Cpu,
+  Layers,
+  PhoneCall,
+} from 'lucide-react';
+
+export const ICON_MAP = {
+  Server,
+  Tv,
+  Shield,
+  Linkedin,
+  Github,
+  Globe,
+  Send,
+  Mail,
+  MapPin,
+  PhoneCall,
+  Award,
+  Briefcase,
+  Code,
+  Cpu,
+  Layers,
+};
+
+export const DEFAULT_DATA = {
+  profile: {},
+  cv: null,
+  socialChannels: [],
+  specializations: [],
+  experience: [],
+  projects: [],
+  certificates: [],
+  announcement: null,
+  footer: {
+    quickLinks: [],
+    copyText: '',
+  },
+};
