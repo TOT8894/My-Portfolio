@@ -35,11 +35,8 @@ export default function About() {
                   <User className="w-5 h-5 text-emerald-500" />
                   Engineering Philosophy & Journey
                 </h3>
-                <p className="text-slate-600 dark:text-neutral-300 text-sm leading-relaxed">
-                  Studying at <strong>{profile.institution ? profile.institution.split('(')[1]?.replace(')', '') || profile.institution : 'AASTU'}</strong>, I built my foundational engineering knowledge across full-stack software development and network design. My work spans constructing responsive single-page web applications with modern React architecture to engineering low-latency Express API microservices.
-                </p>
-                <p className="text-slate-600 dark:text-neutral-300 text-sm leading-relaxed">
-                  Beyond software, I hold deep practical competence in physical network routing, switch configuration (Huawei HCIA), and digital IP surveillance (Hikvision CCTV setup). I am passionate about mentoring student developers as Tech Lead at GDG AASTU and contributing to open community tech initiatives.
+                <p className="text-slate-600 dark:text-neutral-300 text-sm leading-relaxed whitespace-pre-wrap">
+                  {profile.aboutBio || `Studying at ${profile.institution || 'AASTU'}, I built my foundational engineering knowledge across full-stack software development and network infrastructure.`}
                 </p>
 
                 <div className="pt-2 flex flex-wrap gap-2">
