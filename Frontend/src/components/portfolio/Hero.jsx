@@ -42,7 +42,7 @@ export default function Hero() {
           <div className="md:col-span-8 text-center md:text-left space-y-5">
             <ScrollReveal animation="fade-left" delay={150}>
               <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Hi, I'm <span className="text-emerald-600 dark:text-emerald-500">{profile.name || "Shanbel Dires"}</span>
+                Hi, I'm <span className="text-emerald-600 dark:text-emerald-500">{profile.name || "Shanbel Dires"}</span> 👋
               </h1>
             </ScrollReveal>
 
