@@ -112,7 +112,7 @@ export const portfolioService = {
   
   // Profile & Socials
   updateProfile: (profileData) => api.put('/portfolio/profile', profileData),
-  updateSocials: (socialsData) => api.put('/portfolio/socials', socialsData),
+  updateSettings: (settingsData) => api.put('/portfolio/settings', settingsData),
 
   // Specializations
   createSpecialization: (data) => api.post('/portfolio/specializations', data),
