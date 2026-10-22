@@ -1,17 +1,31 @@
 import React from 'react';
 import { ArrowUp, Globe } from 'lucide-react';
-import { usePortfolio } from '../../context/PortfolioContext';
 import { ICON_MAP } from '../../config/iconMap';
 
 export default function Footer() {
-  const { portfolioData } = usePortfolio();
-  const footer = portfolioData?.footer || {};
-  const profile = portfolioData?.profile || {};
-  const socialChannels = portfolioData?.socialChannels || [];
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const quickLinks = [
+    { name: 'Home', href: '/#hero' },
+    { name: 'About Me', href: '/#about' },
+    { name: 'Specializations', href: '/#specializations' },
+    { name: 'Work Experience', href: '/#experience' },
+    { name: 'Projects', href: '/#projects' },
+    { name: 'Certificates', href: '/#certificates' },
+    { name: 'Contact', href: '/#contact' },
+  ];
+
+  const socialChannels = [
+    { id: 'linkedin', platform: 'LinkedIn', url: 'https://www.linkedin.com/in/shanbel-dires-2b60733aa/', iconName: 'Linkedin' },
+    { id: 'github', platform: 'GitHub', url: 'https://github.com/TOT8894', iconName: 'Github' },
+    { id: 'twitter', platform: 'X / Twitter', url: 'https://x.com/shyul143527', iconName: 'Globe' },
+    { id: 'telegram', platform: 'Telegram', url: 'https://t.me/TOT8894', iconName: 'Send' },
+    { id: 'phone', platform: 'Phone Call', handle: '+251 98 894 6528', url: 'tel:+251988946528', iconName: 'PhoneCall' },
+    { id: 'email', platform: 'Email', handle: 'shanbeldires8@gmail.com', url: 'mailto:shanbeldires8@gmail.com', iconName: 'Mail' },
+    { id: 'location', platform: 'Location', handle: 'Addis Ababa, Ethiopia', url: '/#contact', iconName: 'MapPin' },
+  ];
 
   return (
     <footer className="bg-black text-white border-t border-neutral-900 py-16 transition-colors relative">
@@ -22,25 +36,25 @@ export default function Footer() {
           
           {/* Column 1: Brand & Bio (md:col-span-5) */}
           <div className="md:col-span-5 space-y-4">
-            <a href={footer.brandHref || '/#hero'} className="flex items-center gap-2.5 group">
+            <a href="/#hero" className="flex items-center gap-2.5 group">
               <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-base shadow-md group-hover:bg-emerald-500 transition duration-300">
-                {footer.brandMark || ''}
+                SD
               </div>
               <span className="font-extrabold text-xl text-white tracking-tight">
-                {footer.brandName || profile.name || ''}
+                Shanbel<span className="text-emerald-500">.Dires</span>
               </span>
             </a>
             
             <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-sm">
-              {footer.description || ''}
+              Full-Stack Software Engineer & Network Infrastructure Specialist based in Addis Ababa, Ethiopia.
             </p>
             
-            {footer.statusText && <div className="pt-1">
+            <div className="pt-1">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/90 text-emerald-300 text-xs font-semibold border border-emerald-800/80">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                {footer.statusText}
+                Open for Engineering Contracts
               </span>
-            </div>}
+            </div>
           </div>
 
           {/* Column 2: Quick Links (Vertical Column) (md:col-span-3) */}
@@ -49,12 +63,11 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="flex flex-col space-y-2.5 text-xs font-medium text-neutral-300">
-              {(footer.quickLinks || []).map((link, idx) => {
-                const targetHref = link.href.startsWith('#') ? `/${link.href}` : link.href;
+              {quickLinks.map((link) => {
                 return (
-                  <li key={idx}>
+                  <li key={link.name}>
                     <a
-                      href={targetHref}
+                      href={link.href}
                       className="hover:text-emerald-400 transition-colors duration-200 flex items-center gap-1.5"
                     >
                       <span>{link.name}</span>
@@ -97,8 +110,8 @@ export default function Footer() {
 
         {/* Bottom Credits Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-400 gap-4">
-          <p>© {new Date().getFullYear()} {footer.copyrightName || profile.name || ''}. All rights reserved.</p>
-          <p className="text-neutral-300 font-medium">{footer.copyText || ''}</p>
+          <p>© {new Date().getFullYear()} Shanbel Dires. All rights reserved.</p>
+          <p className="text-neutral-300 font-medium">Designed &amp; Built by Shanbel Dires.</p>
 
           <button
             onClick={scrollToTop}
