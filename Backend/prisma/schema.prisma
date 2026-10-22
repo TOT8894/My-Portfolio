@@ -148,3 +148,14 @@ model ContactMessage {
 
   @@map("contact_messages")
 }
+
+model PortfolioSettings {
+  id           String   @id
+  cv           Json?
+  announcement Json?
+  footer       Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("portfolio_settings")
+}
