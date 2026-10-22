@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Comprehensive Automated Backend Test Suite
  * Tests all API endpoints, database operations, security headers, rate limiting,
  * multi-image attributes, CV management, message inbox, and display ordering.
@@ -21,13 +21,13 @@ let testCertId = `cert-test-${Date.now()}`;
 const results = [];
 
 function logPass(title) {
-  console.log(`  ✅ PASS: ${title}`);
+  console.log(`  âœ… PASS: ${title}`);
   results.push({ title, status: 'PASS' });
 }
 
 function logFail(title, err) {
   const errMsg = err ? (err.message || String(err)) : 'Assertion failed';
-  console.error(`  ❌ FAIL: ${title}`);
+  console.error(`  âŒ FAIL: ${title}`);
   console.error(`     Error: ${errMsg}`);
   results.push({ title, status: 'FAIL', error: errMsg });
 }
@@ -85,7 +85,7 @@ function request({ method, path, headers = {}, body = null }) {
 
 async function runTestSuite() {
   console.log('\n================================================================');
-  console.log('🧪 STARTING COMPREHENSIVE BACKEND & PRODUCTION SECURITY TESTS');
+  console.log('ðŸ§ª STARTING COMPREHENSIVE BACKEND & PRODUCTION SECURITY TESTS');
   console.log('================================================================\n');
 
   try {
@@ -145,8 +145,8 @@ async function runTestSuite() {
       method: 'POST',
       path: '/api/auth/login',
       body: {
-        email: process.env.ADMIN_EMAIL || 'admin@shanbeldires.com',
-        password: process.env.ADMIN_PASSWORD || 'admin123',
+        email: process.env.TEST_ADMIN_EMAIL,
+        password: process.env.TEST_ADMIN_PASSWORD,
       },
     });
 
@@ -429,10 +429,10 @@ async function runTestSuite() {
     });
 
   } catch (err) {
-    console.error('💥 Test Suite Encountered Fatal Exception:', err);
+    console.error('ðŸ’¥ Test Suite Encountered Fatal Exception:', err);
   } finally {
     console.log('\n================================================================');
-    console.log(`📊 TEST SUITE SUMMARY: ${results.filter(r => r.status === 'PASS').length} Passed, ${results.filter(r => r.status === 'FAIL').length} Failed`);
+    console.log(`ðŸ“Š TEST SUITE SUMMARY: ${results.filter(r => r.status === 'PASS').length} Passed, ${results.filter(r => r.status === 'FAIL').length} Failed`);
     console.log('================================================================\n');
 
     server.close(() => {
