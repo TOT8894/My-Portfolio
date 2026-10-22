@@ -127,8 +127,7 @@ export default function AdminDashboard() {
       setPortfolioData((prev) => ({ ...prev, cv: payload }));
       showNotification('CV updated successfully! Visitors can now download it.');
     } catch (err) {
-      setPortfolioData((prev) => ({ ...prev, cv: payload }));
-      showNotification('CV saved locally (Backend synced).');
+      showNotification(err.response?.data?.message || err.message || 'Could not save CV.', true);
     }
   };
 
@@ -137,7 +136,8 @@ export default function AdminDashboard() {
     try {
       await portfolioService.deleteCV();
     } catch (err) {
-      // Local fallback
+      showNotification(err.response?.data?.message || err.message || 'Could not delete CV.', true);
+      return;
     }
     setPortfolioData((prev) => ({ ...prev, cv: null }));
     setCvForm({
@@ -182,6 +182,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       await portfolioService.updateProfile(profileForm);
+      await portfolioService.updateSettings({ announcement: announcementForm });
       setPortfolioData((prev) => ({
         ...prev,
         profile: profileForm,
@@ -189,12 +190,7 @@ export default function AdminDashboard() {
       }));
       showNotification('Profile & Announcement updated successfully!');
     } catch (err) {
-      setPortfolioData((prev) => ({
-        ...prev,
-        profile: profileForm,
-        announcement: announcementForm,
-      }));
-      showNotification('Profile saved locally (Backend synced).');
+      showNotification(err.response?.data?.message || err.message || 'Could not save profile.', true);
     }
   };
 
@@ -292,7 +288,8 @@ export default function AdminDashboard() {
         await portfolioService.updateProject(projectWithId.id, projectWithId);
       }
     } catch (e) {
-      console.warn("Backend project save error, applying locally:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not save project.', true);
+      return;
     }
 
     // PREPEND NEW ITEM TO TOP SO IT COMES FIRST!
@@ -314,7 +311,8 @@ export default function AdminDashboard() {
     try {
       await portfolioService.deleteProject(id);
     } catch (e) {
-      console.warn("Backend project delete error:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not delete project.', true);
+      return;
     }
     setPortfolioData((prev) => ({
       ...prev,
@@ -353,7 +351,8 @@ export default function AdminDashboard() {
         await portfolioService.updateCertificate(certWithId.id, certWithId);
       }
     } catch (e) {
-      console.warn("Backend cert save error, applying locally:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not save certificate.', true);
+      return;
     }
 
     // PREPEND NEW CERTIFICATE TO TOP SO IT COMES FIRST!
@@ -375,7 +374,8 @@ export default function AdminDashboard() {
     try {
       await portfolioService.deleteCertificate(id);
     } catch (e) {
-      console.warn("Backend cert delete error:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not delete certificate.', true);
+      return;
     }
     setPortfolioData((prev) => ({
       ...prev,
@@ -414,7 +414,8 @@ export default function AdminDashboard() {
         await portfolioService.updateSpecialization(specWithId.id, specWithId);
       }
     } catch (e) {
-      console.warn("Backend specialization save error:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not save specialization.', true);
+      return;
     }
 
     // PREPEND NEW SPECIALIZATION TO TOP SO IT COMES FIRST!
@@ -436,7 +437,8 @@ export default function AdminDashboard() {
     try {
       await portfolioService.deleteSpecialization(id);
     } catch (e) {
-      console.warn("Backend specialization delete error:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not delete specialization.', true);
+      return;
     }
     setPortfolioData((prev) => ({
       ...prev,
@@ -476,7 +478,8 @@ export default function AdminDashboard() {
         await portfolioService.updateExperience(expWithId.id, expWithId);
       }
     } catch (e) {
-      console.warn("Backend experience save error:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not save experience.', true);
+      return;
     }
 
     // PREPEND NEW EXPERIENCE TO TOP SO IT COMES FIRST!
@@ -498,7 +501,8 @@ export default function AdminDashboard() {
     try {
       await portfolioService.deleteExperience(id);
     } catch (e) {
-      console.warn("Backend experience delete error:", e.message);
+      showNotification(e.response?.data?.message || e.message || 'Could not delete experience.', true);
+      return;
     }
     setPortfolioData((prev) => ({
       ...prev,
@@ -512,7 +516,8 @@ export default function AdminDashboard() {
     try {
       await portfolioService.markMessageRead(id);
     } catch (e) {
-      // Local fallback
+      showNotification(e.response?.data?.message || e.message || 'Could not mark message as read.', true);
+      return;
     }
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, isRead: true } : m)));
     showNotification('Message marked as read.');
@@ -523,7 +528,8 @@ export default function AdminDashboard() {
     try {
       await portfolioService.deleteMessage(id);
     } catch (e) {
-      // Local fallback
+      showNotification(e.response?.data?.message || e.message || 'Could not delete message.', true);
+      return;
     }
     setMessages((prev) => prev.filter((m) => m.id !== id));
     showNotification('Message removed from inbox.');
