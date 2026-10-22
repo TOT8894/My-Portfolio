@@ -19,6 +19,15 @@ export const portfolioController = {
     }
   },
 
+  async updateSettings(req, res, next) {
+    try {
+      const updated = await portfolioService.updateSettings(req.body);
+      return res.json({ success: true, settings: updated });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // SPECIALIZATIONS
   async createSpecialization(req, res, next) {
     try {
