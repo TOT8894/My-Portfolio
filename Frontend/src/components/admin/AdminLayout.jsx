@@ -21,7 +21,7 @@ import { usePortfolio } from '../../context/PortfolioContext';
 
 export default function AdminLayout({ activeTab, setActiveTab, children }) {
   const { adminUser, logout } = useAuth();
-  const { isUsingFallback, refreshPortfolioData, loading } = usePortfolio();
+  const { error, refreshPortfolioData, loading } = usePortfolio();
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -85,15 +85,9 @@ export default function AdminLayout({ activeTab, setActiveTab, children }) {
                 <Database className="w-3.5 h-3.5 text-emerald-500" />
                 Data Source:
               </span>
-              {isUsingFallback ? (
-                <span className="text-amber-500 font-bold flex items-center gap-1">
-                  Demo Fallback
-                </span>
-              ) : (
-                <span className="text-emerald-500 font-bold flex items-center gap-1">
-                  PostgreSQL Active
-                </span>
-              )}
+              <span className={`font-bold flex items-center gap-1 ${error ? 'text-red-500' : 'text-emerald-500'}`}>
+                {error ? 'Database Error' : 'PostgreSQL Active'}
+              </span>
             </div>
           </div>
 
