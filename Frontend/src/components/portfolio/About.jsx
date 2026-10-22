@@ -17,7 +17,7 @@ export default function About() {
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Background</span>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
-              About {profile.name || "Shanbel Dires"}
+              About Me
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm sm:text-base">
               Engineered at the intersection of web software development and physical network infrastructure.
