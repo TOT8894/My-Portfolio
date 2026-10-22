@@ -9,6 +9,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initializeAuth = async () => {
+      if (!getAccessToken()) {
+        setAccessToken(null);
+        setAuthLoading(false);
+        return;
+      }
+
       try {
         // Try refreshing token or fetching current user profile
         const refreshRes = await authService.refreshToken();
@@ -30,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const res = await authService.login({ email, password });
+    const res = await authService.login({ email: email.trim(), password });
     if (res.data.accessToken) {
       setAccessToken(res.data.accessToken);
       setAdminUser(res.data.user);
