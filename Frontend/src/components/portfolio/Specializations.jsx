@@ -2,7 +2,7 @@ import React from 'react';
 import { Server, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePortfolio } from '../../context/PortfolioContext';
-import { ICON_MAP } from '../../data/defaultPortfolioData';
+import { ICON_MAP } from '../../config/iconMap';
 import ScrollReveal from '../common/ScrollReveal';
 
 export default function Specializations() {
