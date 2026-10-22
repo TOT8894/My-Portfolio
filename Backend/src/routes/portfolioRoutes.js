@@ -9,6 +9,7 @@ router.get('/', portfolioController.getAllData);
 
 // Protected Admin Portfolio Management
 router.put('/profile', verifyAccessToken, portfolioController.updateProfile);
+router.put('/settings', verifyAccessToken, portfolioController.updateSettings);
 
 // Specializations
 router.post('/specializations', verifyAccessToken, portfolioController.createSpecialization);
