@@ -1,91 +1,19 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import prisma from '../config/prisma.js';
 import { sendEmail } from '../config/mailer.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const MESSAGES_FILE = path.join(__dirname, '../data/contact-messages.json');
-
-// Helper to safely read messages from disk
-function loadMessagesFromDisk() {
-  try {
-    if (fs.existsSync(MESSAGES_FILE)) {
-      const content = fs.readFileSync(MESSAGES_FILE, 'utf-8');
-      return JSON.parse(content);
-    }
-  } catch (err) {
-    console.warn('⚠️ Could not read contact-messages.json from disk:', err.message);
-  }
-  return [];
-}
-
-// Helper to safely write messages to disk
-function saveMessagesToDisk(messages) {
-  try {
-    const dir = path.dirname(MESSAGES_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('⚠️ Could not save contact-messages.json to disk:', err.message);
-  }
-}
-
-// In-Memory Dev Message Cache loaded from disk
-let persistentMessages = loadMessagesFromDisk();
 
 export const contactService = {
   async createMessage(data) {
     const { name, email, phone, subject, message } = data;
     const phoneClean = (phone || '').trim();
-    const createdAtIso = new Date().toISOString();
-
-    let savedMessage = null;
-
-    // 1. Attempt Prisma DB Save
-    try {
-      savedMessage = await prisma.contactMessage.create({
-        data: {
-          name: name || 'Anonymous Visitor',
-          email: email || 'no-reply@example.com',
-          phone: phoneClean,
-          subject: subject || 'General Inquiry',
-          message: message || '',
-        },
-      });
-    } catch (e) {
-      // If Prisma client doesn't have phone argument generated yet, save core fields
-      try {
-        savedMessage = await prisma.contactMessage.create({
-          data: {
-            name: name || 'Anonymous Visitor',
-            email: email || 'no-reply@example.com',
-            subject: subject || 'General Inquiry',
-            message: message || '',
-          },
-        });
-        savedMessage.phone = phoneClean;
-      } catch (innerErr) {
-        // Resilient disk fallback with unique ID
-        savedMessage = {
-          id: `msg-${Date.now()}`,
-          name: name || 'Anonymous Visitor',
-          email: email || 'no-reply@example.com',
-          phone: phoneClean,
-          subject: subject || 'General Inquiry',
-          message: message || '',
-          isRead: false,
-          createdAt: createdAtIso,
-        };
-      }
-    }
-
-    // Always record in persistent disk store
-    persistentMessages.unshift(savedMessage);
-    saveMessagesToDisk(persistentMessages);
+    const savedMessage = await prisma.contactMessage.create({
+      data: {
+        name: name || 'Anonymous Visitor',
+        email: email || 'no-reply@example.com',
+        phone: phoneClean,
+        subject: subject || 'General Inquiry',
+        message: message || '',
+      },
+    });
 
     // 2. Query dynamic profile for notifications & receipts
     let dbProfile = null;
@@ -236,52 +164,21 @@ export const contactService = {
   },
 
   async getAllMessages() {
-    try {
-      const dbMessages = await prisma.contactMessage.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
-      if (dbMessages && dbMessages.length > 0) {
-        const diskMap = new Map(persistentMessages.map((m) => [m.id, m]));
-        return dbMessages.map((msg) => {
-          const fromDisk = diskMap.get(msg.id);
-          return {
-            ...msg,
-            phone: msg.phone || fromDisk?.phone || '',
-          };
-        });
-      }
-    } catch (e) {
-      console.warn('Prisma contact messages read error, using persistent store:', e.message);
-    }
-    return persistentMessages;
+    return prisma.contactMessage.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   },
 
   async markAsRead(id) {
-    try {
-      await prisma.contactMessage.update({
-        where: { id },
-        data: { isRead: true },
-      });
-    } catch (e) {
-      // Fallback
-    }
-
-    persistentMessages = persistentMessages.map((m) =>
-      m.id === id ? { ...m, isRead: true } : m
-    );
-    saveMessagesToDisk(persistentMessages);
+    await prisma.contactMessage.update({
+      where: { id },
+      data: { isRead: true },
+    });
     return { success: true };
   },
 
   async deleteMessage(id) {
-    try {
-      await prisma.contactMessage.delete({ where: { id } });
-    } catch (e) {
-      // Fallback
-    }
-
-    persistentMessages = persistentMessages.filter((m) => m.id !== id);
-    saveMessagesToDisk(persistentMessages);
+    await prisma.contactMessage.delete({ where: { id } });
     return { success: true };
   },
 
@@ -536,18 +433,10 @@ ${cleanMsg}
     });
     // If this was a reply to an existing contact message, mark it as read and record reply metadata
     if (messageId) {
-      try {
-        await prisma.contactMessage.update({
-          where: { id: messageId },
-          data: { isRead: true },
-        });
-      } catch (e) {
-        // fallback
-      }
-      persistentMessages = persistentMessages.map((m) =>
-        m.id === messageId ? { ...m, isRead: true, replied: true, lastRepliedAt: new Date().toISOString() } : m
-      );
-      saveMessagesToDisk(persistentMessages);
+      await prisma.contactMessage.update({
+        where: { id: messageId },
+        data: { isRead: true },
+      });
     }
 
     return {
