@@ -11,18 +11,6 @@ if (!JWT_ACCESS_SECRET || !JWT_REFRESH_SECRET) {
   throw new Error('FATAL SECURITY ERROR: JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be defined in .env');
 }
 
-// Resilient in-memory fallback admin synchronized with configured environment
-const devAdminPassword = process.env.ADMIN_PASSWORD;
-let devAdminUser = {
-  id: 'dev-admin-id-1',
-  name: process.env.ADMIN_NAME,
-  email: process.env.ADMIN_EMAIL,
-  passwordHash: devAdminPassword ? bcrypt.hashSync(devAdminPassword, 10) : null,
-  refreshToken: null,
-  resetToken: null,
-  resetTokenExpires: null,
-};
-
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { id: user.id, email: user.email, name: user.name },
@@ -42,19 +30,11 @@ const generateTokens = (user) => {
 export const authService = {
   async login(email, password) {
     let user = null;
+    const normalizedEmail = email.trim().toLowerCase();
 
-    try {
-      user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
-      });
-    } catch (e) {
-      console.warn('Prisma query bypassed, falling back to local memory:', e.message);
-    }
-
-    const configuredAdminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase();
-    if (!user && (email.toLowerCase() === (devAdminUser.email || '').toLowerCase() || (configuredAdminEmail && email.toLowerCase() === configuredAdminEmail))) {
-      user = devAdminUser;
-    }
+    user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
 
     if (!user) {
       const error = new Error('Invalid email or password.');
@@ -62,7 +42,7 @@ export const authService = {
       throw error;
     }
 
-    const targetHash = user.password || user.passwordHash;
+    const targetHash = user.password;
     if (!targetHash) {
       const error = new Error('Invalid email or password.');
       error.statusCode = 401;
@@ -78,18 +58,10 @@ export const authService = {
 
     const { accessToken, refreshToken } = generateTokens(user);
 
-    try {
-      if (user.id !== 'dev-admin-id-1') {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { refreshToken },
-        });
-      } else {
-        devAdminUser.refreshToken = refreshToken;
-      }
-    } catch (e) {
-      devAdminUser.refreshToken = refreshToken;
-    }
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
 
     return {
       accessToken,
@@ -119,17 +91,9 @@ export const authService = {
     }
 
     let user = null;
-    try {
-      user = await prisma.user.findFirst({
-        where: { id: decoded.id, refreshToken },
-      });
-    } catch (e) {
-      // Prisma query bypassed, checking fallback store
-    }
-
-    if (!user && devAdminUser.refreshToken === refreshToken) {
-      user = devAdminUser;
-    }
+    user = await prisma.user.findFirst({
+      where: { id: decoded.id, refreshToken },
+    });
 
     if (!user) {
       const error = new Error('Refresh token revoked or session not found.');
@@ -148,14 +112,10 @@ export const authService = {
 
   async logout(refreshToken) {
     if (refreshToken) {
-      try {
-        await prisma.user.updateMany({
-          where: { refreshToken },
-          data: { refreshToken: null },
-        });
-      } catch (e) {
-        devAdminUser.refreshToken = null;
-      }
+      await prisma.user.updateMany({
+        where: { refreshToken },
+        data: { refreshToken: null },
+      });
     }
     return { success: true };
   },
@@ -164,21 +124,13 @@ export const authService = {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    let userUpdated = false;
-    try {
-      const updated = await prisma.user.update({
-        where: { email: email.toLowerCase() },
-        data: {
-          resetToken,
-          resetTokenExpires: expires,
-        },
-      });
-      if (updated) userUpdated = true;
-    } catch (e) {
-      devAdminUser.resetToken = resetToken;
-      devAdminUser.resetTokenExpires = expires;
-      userUpdated = true;
-    }
+    await prisma.user.update({
+      where: { email: email.toLowerCase() },
+      data: {
+        resetToken,
+        resetTokenExpires: expires,
+      },
+    });
 
     const frontendUrl = process.env.FRONTEND_URL || 'https://shanbeldires.pro.et';
     const resetUrl = `${frontendUrl}/admin/reset-password/${resetToken}`;
@@ -208,41 +160,27 @@ export const authService = {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    let resetSuccess = false;
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpires: { gt: new Date() },
+      },
+    });
 
-    try {
-      const user = await prisma.user.findFirst({
-        where: {
-          resetToken: token,
-          resetTokenExpires: { gt: new Date() },
-        },
-      });
-
-      if (user) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            password: hashedPassword,
-            resetToken: null,
-            resetTokenExpires: null,
-          },
-        });
-        resetSuccess = true;
-      }
-    } catch (e) {
-      if (devAdminUser.resetToken === token && devAdminUser.resetTokenExpires > new Date()) {
-        devAdminUser.passwordHash = hashedPassword;
-        devAdminUser.resetToken = null;
-        devAdminUser.resetTokenExpires = null;
-        resetSuccess = true;
-      }
-    }
-
-    if (!resetSuccess) {
+    if (!user) {
       const error = new Error('Invalid or expired password reset token.');
       error.statusCode = 400;
       throw error;
     }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpires: null,
+      },
+    });
 
     return { message: 'Password updated successfully. You can now log in.' };
   },
