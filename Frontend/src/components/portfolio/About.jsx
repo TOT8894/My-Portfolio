@@ -6,7 +6,11 @@ import ScrollReveal from '../common/ScrollReveal';
 export default function About() {
   const { portfolioData } = usePortfolio();
   const profile = portfolioData?.profile || {};
-  const stats = profile.stats || [];
+  const stats = [
+    { label: 'Years Experience of Programming', value: '2+' },
+    { label: 'Projects Completed', value: '8+' },
+    { label: 'Certifications', value: '6+' },
+  ];
 
   return (
     <section id="about" className="py-20 bg-white dark:bg-black border-t border-slate-200 dark:border-neutral-900 transition-colors overflow-hidden">
@@ -70,14 +74,14 @@ export default function About() {
           </div>
 
           {/* Stats Grid */}
-          <div className="md:col-span-5 grid grid-cols-2 gap-4">
+          <div className="md:col-span-5 grid grid-cols-1 gap-4">
             {stats.map((stat, idx) => (
               <ScrollReveal key={idx} animation="zoom-in" delay={150 + idx * 80}>
-                <div className="bg-slate-50 dark:bg-neutral-950 p-6 rounded-3xl border border-slate-200 dark:border-neutral-900 text-center flex flex-col justify-center shadow-sm hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-300">
-                  <p className="text-3xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/70 text-center flex flex-col items-center justify-center shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-950/70 hover:-translate-y-0.5 transition-all duration-300">
+                  <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
                     {stat.value}
                   </p>
-                  <p className="text-xs font-medium text-slate-600 dark:text-neutral-400 mt-1">
+                  <p className="text-[10px] font-semibold text-emerald-800 dark:text-emerald-300 mt-0.5">
                     {stat.label}
                   </p>
                 </div>
