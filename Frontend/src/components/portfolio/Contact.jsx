@@ -76,9 +76,9 @@ export default function Contact() {
     }
   };
 
-  const phoneValue = profile.phone || "0991185321";
-  const emailValue = profile.email || "shanbel.dires@gmail.com";
-  const addressValue = profile.location || "Addis Ababa, Ethiopia";
+  const phoneValue = profile.phone || '+251 98 894 6528';
+  const emailValue = profile.email || 'shanbeldires8@gmail.com';
+  const addressValue = profile.location || 'Addis Ababa, Ethiopia';
 
   return (
     <section id="contact" className="py-20 md:py-28 bg-[#EBF1F6] dark:bg-black transition-colors overflow-hidden">
