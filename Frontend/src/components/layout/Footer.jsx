@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowUp, Globe } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
-import { ICON_MAP } from '../../data/defaultPortfolioData';
+import { ICON_MAP } from '../../config/iconMap';
 
 export default function Footer() {
   const { portfolioData } = usePortfolio();
@@ -22,26 +22,25 @@ export default function Footer() {
           
           {/* Column 1: Brand & Bio (md:col-span-5) */}
           <div className="md:col-span-5 space-y-4">
-            <a href="/#hero" className="flex items-center gap-2.5 group">
+            <a href={footer.brandHref || '/#hero'} className="flex items-center gap-2.5 group">
               <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-base shadow-md group-hover:bg-emerald-500 transition duration-300">
-                SD
+                {footer.brandMark || ''}
               </div>
               <span className="font-extrabold text-xl text-white tracking-tight">
-                {profile.name ? profile.name.split(' ')[0] : 'Shanbel'}
-                <span className="text-emerald-500">.{profile.name ? profile.name.split(' ')[1] || 'Dires' : 'Dires'}</span>
+                {footer.brandName || profile.name || ''}
               </span>
             </a>
             
             <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-sm">
-              {profile.role || "Full-Stack Software Engineer & Network Infrastructure Specialist"} based in {profile.location || "Addis Ababa, Ethiopia"}.
+              {footer.description || ''}
             </p>
             
-            <div className="pt-1">
+            {footer.statusText && <div className="pt-1">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/90 text-emerald-300 text-xs font-semibold border border-emerald-800/80">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Open for Engineering Contracts
+                {footer.statusText}
               </span>
-            </div>
+            </div>}
           </div>
 
           {/* Column 2: Quick Links (Vertical Column) (md:col-span-3) */}
@@ -50,7 +49,7 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="flex flex-col space-y-2.5 text-xs font-medium text-neutral-300">
-              {footer.quickLinks && footer.quickLinks.map((link, idx) => {
+              {(footer.quickLinks || []).map((link, idx) => {
                 const targetHref = link.href.startsWith('#') ? `/${link.href}` : link.href;
                 return (
                   <li key={idx}>
@@ -84,7 +83,9 @@ export default function Footer() {
                     >
                       <IconComp className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
                       <span className="text-white font-medium">{channel.platform}</span>
-                      <span className="text-[11px] text-neutral-400 truncate">({channel.handle})</span>
+                      {(channel.id === 'location' || channel.id === 'email') && channel.handle && (
+                        <span className="text-[11px] text-neutral-400 truncate">({channel.handle})</span>
+                      )}
                     </a>
                   </li>
                 );
@@ -96,8 +97,8 @@ export default function Footer() {
 
         {/* Bottom Credits Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-400 gap-4">
-          <p>© {new Date().getFullYear()} {profile.name || 'Shanbel Dires'}. All rights reserved.</p>
-          <p className="text-neutral-300 font-medium">{footer.copyText || "Designed & Built by Shanbel Dires."}</p>
+          <p>© {new Date().getFullYear()} {footer.copyrightName || profile.name || ''}. All rights reserved.</p>
+          <p className="text-neutral-300 font-medium">{footer.copyText || ''}</p>
 
           <button
             onClick={scrollToTop}
